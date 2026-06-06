@@ -1,0 +1,48 @@
+name: Version Check
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run version check
+        run: python latest_version_check.py --no-cache > versions.txt || true
+
+      - name: Render into README
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          table = Path("versions.txt").read_text().rstrip()
+          if len(table.splitlines()) < 2:
+              raise SystemExit("version check produced no table; leaving README unchanged")
+
+          start, end = "<!-- VERSIONS:START -->", "<!-- VERSIONS:END -->"
+          block = f"{start}\n```\n{table}\n```\n{end}"
+          readme = Path("README.md").read_text()
+          updated = re.sub(re.escape(start) + r".*?" + re.escape(end), block, readme, flags=re.S)
+          Path("README.md").write_text(updated)
+          PY
+          rm -f versions.txt
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "chore: update versions"
+          git push
