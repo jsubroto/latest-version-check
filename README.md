@@ -15,7 +15,7 @@ Auto-updated daily by GitHub Actions. Commits land only when a version actually 
 ```
 tool    latest   releaseDate  eolDate   
 ======  =======  ===========  ==========
-nodejs  24.18.1  2025-05-06   2028-04-30
+nodejs  24.19.0  2025-05-06   2028-04-30
 python  3.14.6   2025-10-07   2030-10-31
 nextjs  16.2.12  2025-10-22             
 react   19.2.8   2024-12-05
